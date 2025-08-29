@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "start": "node scripts/prepare_temp.js && node src/file-renamer_v1.js",
     "test": "node scripts/prepare_temp.js && node test/renameFile_v1.test.js"
   },
   "author": "Luis",
