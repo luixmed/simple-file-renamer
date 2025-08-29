@@ -43,9 +43,20 @@ export function renameFiles(filePath) {
               : `✅ Renamed ${oldName} → ${newName}`
           );
           completed++;
-          if (completed === pairs.length) resolve(summary);
+          if (completed === pairs.length) {
+            fs.writeFile(outPath, summary.join("\n"), (writeErr) => {
+              if (writeErr) {
+                return reject(
+                  `❌ Failed to write summary: ${writeErr.message}`
+                );
+              }
+              console.log(`📄 Summary written to ${outPath}`);
+            });
+          }
         });
       });
     });
   });
 }
+
+renameFiles(inputPath);
