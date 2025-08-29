@@ -7,3 +7,18 @@ export function createNewFilesNames(text) {
     return namePairs;
   }, []);
 }
+
+export function renameFiles(filePath) {
+  fs.readFile(filePath, { encoding: "utf-8" }, (readErr, data) => {
+    if (readErr) {
+      console.error("❌ Failed to read file:", readErr.message);
+      return;
+    }
+
+    const pairs = createNewFilesNames(data);
+    if (pairs.length === 0) {
+      console.log("⚠️ No valid filenames found.");
+      return;
+    }
+  });
+}
