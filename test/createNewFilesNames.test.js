@@ -19,4 +19,4 @@ console.log(
   JSON.stringify(result) === JSON.stringify(expected) ? "PASS" : "FAIL"
 );
 
-console.log("result:", result);
+console.log("Result:", result);
