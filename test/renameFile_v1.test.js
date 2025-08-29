@@ -19,8 +19,8 @@ async function runTests() {
   }
   console.log("\n🔍 Test: Empty file");
   try {
-    const summary = await renameFiles(emptyFilePath);
-    summary.forEach((line) => console.log(line));
+    const result = await renameFiles(emptyFilePath);
+    console.log(result);
   } catch (err) {
     console.error(err);
   }
