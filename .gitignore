@@ -4,3 +4,6 @@
 # Files
 data/renamed_files.txt
 data/new_*
+
+# Temporary directories
+temp_data/
