@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node scripts/prepare_temp.js && node src/file-renamer_v1.js"
   },
   "author": "Luis",
   "license": "ISC"
