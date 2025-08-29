@@ -1,0 +1,6 @@
+# Code Editor
+.vscode/
+
+# Files
+data/renamed_files.txt
+data/new_*
