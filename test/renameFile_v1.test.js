@@ -18,5 +18,6 @@ renameFiles(emptyFilePath).then((res) => console.log(res));
 // Test 3: Valid rename summary
 const validFilePath = path.join(process.cwd(), "data", "old_names.txt");
 console.log("\n Test rename summary");
-renameFiles(validFilePath)
-  .then(summary=>summary.forEach(line=>console.log(line);))
+renameFiles(validFilePath).then((summary) =>
+  summary.forEach((line) => console.log(line))
+);
