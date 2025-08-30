@@ -1,20 +1,12 @@
 import fs from "fs";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
+import { createNewFilesNames } from "./utils/filename-utils.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const inputPath = path.join(__dirname, "../data/old_names.txt");
 const outPath = path.join(__dirname, "../data/renamed_files.txt");
-
-export function createNewFilesNames(text) {
-  return text.split("\n").reduce((namePairs, oldName) => {
-    oldName = oldName.trim();
-    if (oldName) namePairs.push([oldName, `new_${oldName}`]);
-    return namePairs;
-  }, []);
-}
 
 export function renameFiles(filePath) {
   return new Promise((resolve, reject) => {
