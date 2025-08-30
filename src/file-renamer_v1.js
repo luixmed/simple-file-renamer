@@ -51,6 +51,7 @@ export function renameFiles(filePath) {
                 );
               }
               console.log(`📄 Summary written to ${outPath}`);
+              resolve(summary);
             });
           }
         });
@@ -58,5 +59,3 @@ export function renameFiles(filePath) {
     });
   });
 }
-
-renameFiles(inputPath);
