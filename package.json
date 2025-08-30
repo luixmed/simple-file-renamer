@@ -5,8 +5,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node scripts/prepare_temp.js && node src/file-renamer_v1.js",
-    "test": "node scripts/prepare_temp.js && node test/renameFile_v1.test.js"
+    "start:v1": "node scripts/prepare_temp.js && node src/index.js --version=1",
+    "start:v2": "node scripts/prepare_temp.js && node src/index.js --version=2",
+    "start:v3": "node scripts/prepare_temp.js && node src/index.js --version=3",
+    "test:v1": "node scripts/prepare_temp.js && node test/renameFile_v1.test.js",
+    "test:v2": "node scripts/prepare_temp.js && node test/renameFile_v2.test.js",
+    "test:v3": "node scripts/prepare_temp.js && node test/renameFile_v3.test.js"
   },
   "author": "Luis",
   "license": "ISC"
