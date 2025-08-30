@@ -1,4 +1,4 @@
-import { createNewFilesNames } from "../src/file-renamer_v1.js";
+import { createNewFilesNames } from "../src/utils/filename-utils.js";
 
 const input = `
     demo.txt
