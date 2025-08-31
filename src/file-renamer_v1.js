@@ -1,75 +1,116 @@
 import fs from "fs";
-import { fileURLToPath } from "url";
-import path, { dirname } from "path";
+import path from "path";
 import { createNewFilesNames } from "./utils/filename-utils.js";
+import { log, error, debug, success } from "./utils/logger.js";
+import { config } from "./utils/config.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-export function renameFiles(options) {
+// 1. Read and parse the file list
+function readFileList(filePath) {
   return new Promise((resolve, reject) => {
-    const { inputFile, sourceDir, reportFile } = options;
-
-    fs.access(inputFile, (notFoundErr) => {
-      if (notFoundErr) {
-        return reject(`❌ Input file not found: ${inputFile}`);
+    fs.readFile(filePath, { encoding: "utf-8" }, (readErr, data) => {
+      if (readErr) {
+        return reject(`Failed to read file: ${readErr.message}`);
       }
 
-      fs.readFile(inputFile, { encoding: "utf-8" }, (readErr, data) => {
-        if (readErr) {
-          return reject(`❌ Failed to read file: ${readErr.message}`);
-        }
+      const pairs = createNewFilesNames(data);
+      if (pairs.length === 0) {
+        return reject("No valid filenames found in the input file.");
+      }
 
-        const pairs = createNewFilesNames(data);
-        if (pairs.length === 0) {
-          return resolve("⚠️ No valid filenames found.");
-        }
-
-        const summary = [];
-        const workingDir = sourceDir;
-
-        let completed = 0;
-        pairs.forEach(([oldName, newName]) => {
-          const oldPath = path.join(workingDir, oldName);
-          const newPath = path.join(workingDir, newName);
-
-          fs.access(oldPath, (notFoundErr) => {
-            if (notFoundErr) {
-              // Push error message and skip rename operation
-              summary.push(`❌ Source file not found: ${oldName}`);
-              completed++;
-              if (completed === pairs.length) {
-                writeSummary(summary, outPath, resolve, reject);
-              }
-              return; // Move to next file
-            }
-
-            // ONLY IF EXISTS: Proceed with rename operation
-            fs.rename(oldPath, newPath, (renameErr) => {
-              summary.push(
-                renameErr
-                  ? `❌ Failed to rename ${oldName}: ${renameErr.message}`
-                  : `✅ Renamed ${oldName} → ${newName}`
-              );
-              completed++;
-              if (completed === pairs.length) {
-                writeSummary(summary, reportFile, resolve, reject);
-              }
-            });
-          });
-        });
-      });
+      debug(`Found ${pairs.length} files to process`);
+      resolve(pairs);
     });
   });
 }
 
-// Helper function to handle summary writing
-function writeSummary(summary, outputPath, resolve, reject) {
-  fs.writeFile(outputPath, summary.join("\n"), (writeErr) => {
-    if (writeErr) {
-      return reject(`❌ Failed to write summary: ${writeErr.message}`);
-    }
-    console.log(`📄 Summary written to ${outputPath}`);
-    resolve(summary);
+// 2. Check if a file exists
+function checkFileExists(filePath) {
+  return new Promise((resolve) => {
+    fs.access(filePath, (err) => {
+      resolve(!err);
+    });
   });
+}
+
+// 3. Rename a single file
+function renameSingleFile(oldPath, newPath) {
+  return new Promise((resolve, reject) => {
+    fs.rename(oldPath, newPath, (renameErr) => {
+      if (renameErr) {
+        reject(`Failed to rename: ${renameErr.message}`);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+// 4. Process all files (main logic)
+async function processFiles(pairs, sourceDir, reportFile) {
+  const summary = [];
+
+  for (const [oldName, newName] of pairs) {
+    const oldPath = path.join(sourceDir, oldName);
+    const newPath = path.join(sourceDir, newName);
+
+    try {
+      // Check if source file exists
+      const fileExists = await checkFileExists(oldPath);
+      if (!fileExists) {
+        summary.push(`❌ Source file not found: ${oldName}`);
+        continue;
+      }
+
+      // Rename the file
+      await renameSingleFile(oldPath, newPath);
+      summary.push(`✅ Renamed ${oldName} → ${newName}`);
+    } catch (error) {
+      summary.push(`❌ Failed to rename ${oldName}: ${error}`);
+    }
+  }
+
+  return summary;
+}
+
+// 5. Generate the report
+function generateReport(summary, outputPath) {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(outputPath, summary.join("\n"), (writeErr) => {
+      if (writeErr) {
+        reject(`Failed to write summary: ${writeErr.message}`);
+      } else {
+        resolve(summary);
+      }
+    });
+  });
+}
+
+// Main exported function (now much cleaner)
+export async function renameFiles(options) {
+  const { inputFile, sourceDir, reportFile } = options;
+
+  try {
+    // Initialize logger with options if needed
+    debug(`Starting rename operation with options: ${JSON.stringify(options)}`);
+
+    // Read and parse the file list
+    log("📖 Reading the list...");
+    const pairs = await readFileList(inputFile);
+
+    // Process all files
+    log("🔄️ Processing files...");
+    const summary = await processFiles(pairs, sourceDir, reportFile);
+
+    // Generate report
+    log("📊 Generating report...");
+    await generateReport(summary, reportFile);
+
+    success("Rename operation completed successfully");
+    debug(`Summary written to: ${reportFile}`);
+
+    return summary;
+  } catch (err) {
+    error(`Operation failed: ${err}`);
+    throw err;
+  }
 }
