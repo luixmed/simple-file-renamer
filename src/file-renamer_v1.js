@@ -6,15 +6,16 @@ import { createNewFilesNames } from "./utils/filename-utils.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const outPath = path.join(__dirname, "../data/renamed_files.txt");
-
-export function renameFiles(filePath) {
+export function renameFiles(options) {
   return new Promise((resolve, reject) => {
-    fs.access(filePath, (notFoundErr) => {
+    const { inputFile, sourceDir, reportFile } = options;
+
+    fs.access(inputFile, (notFoundErr) => {
       if (notFoundErr) {
-        return reject(`❌ Input file not found: ${filePath}`);
+        return reject(`❌ Input file not found: ${inputFile}`);
       }
-      fs.readFile(filePath, { encoding: "utf-8" }, (readErr, data) => {
+
+      fs.readFile(inputFile, { encoding: "utf-8" }, (readErr, data) => {
         if (readErr) {
           return reject(`❌ Failed to read file: ${readErr.message}`);
         }
@@ -25,21 +26,18 @@ export function renameFiles(filePath) {
         }
 
         const summary = [];
-        const workingDir = path.join(__dirname, "../temp_data");
+        const workingDir = sourceDir;
 
         let completed = 0;
         pairs.forEach(([oldName, newName]) => {
-          // AFTER READING THE LIST: Construct full path
           const oldPath = path.join(workingDir, oldName);
           const newPath = path.join(workingDir, newName);
 
-          // BEFORE RENAMING: Check if source file exists
           fs.access(oldPath, (notFoundErr) => {
             if (notFoundErr) {
               // Push error message and skip rename operation
               summary.push(`❌ Source file not found: ${oldName}`);
               completed++;
-              // Check if all operations are done
               if (completed === pairs.length) {
                 writeSummary(summary, outPath, resolve, reject);
               }
@@ -55,7 +53,7 @@ export function renameFiles(filePath) {
               );
               completed++;
               if (completed === pairs.length) {
-                writeSummary(summary, outPath, resolve, reject);
+                writeSummary(summary, reportFile, resolve, reject);
               }
             });
           });
