@@ -13,5 +13,8 @@
     "test:v3": "node scripts/prepare_temp.js && node test/renameFile_v3.test.js"
   },
   "author": "Luis",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "yargs": "^18.0.0"
+  }
 }

@@ -1,3 +1,6 @@
+# npm modules
+node_modules/
+
 # Code Editor
 .vscode/
 
